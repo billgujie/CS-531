@@ -5,13 +5,17 @@
 # Libraries
 *.lib
 *.a
+.codelite
+.clang
+*.session
+*.db
 
 # Shared objects (inc. Windows DLLs)
 *.dll
 *.so
 *.so.*
 *.dylib
-
+*.workspace
 # Executables
 *.exe
 *.out
