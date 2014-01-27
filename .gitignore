@@ -16,7 +16,12 @@
 *.so.*
 *.dylib
 *.workspace
+*.project
+
 # Executables
 *.exe
 *.out
 *.app
+
+#others
+*~
