@@ -32,4 +32,4 @@ typedef struct ArgvsTag {
  * functions called
  */
  Argvs ParseCommandLine ( int argc, char **argv );
- int stream ( char* pphrase, int cipher_len );
+ int stream ( char* p, int cipher_len );
