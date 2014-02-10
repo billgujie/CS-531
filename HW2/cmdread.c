@@ -2,14 +2,12 @@
 
 void Usage()
 {
-	fprintf (
-	    stderr,
-	    "ERR: argument syntax error\n\
+	printerror (
+	    "argument syntax error\n\
 ./hw2 stream -p=pphrase -l=len\n\
 ./hw2 encrypt -p=pphrase -out=name [pbmfile]\n\
 ./hw2 merge pbmfile1 pbmfile2\n\
-./hw2 decrypt [pbmfile]\n" );
-	exit ( 1 );
+./hw2 decrypt [pbmfile]" );
 }
 void checkarglimit ( int msg_type, int argc )
 {
