@@ -58,8 +58,8 @@ int generatePBMs ( char* outputname, int width, int height, unsigned char  *key_
 	unsigned char cur_key_byte;
 	unsigned char cur_pbm_byte;
 
-	char outname1[BUFLEN] = "";
-	char outname2[BUFLEN] = "";
+	char outname1[BUFLEN];
+	char outname2[BUFLEN];
 	strcpy ( outname1, outputname );
 	strcpy ( outname2, outputname );
 	FILE * share1;
@@ -82,10 +82,10 @@ int generatePBMs ( char* outputname, int width, int height, unsigned char  *key_
 	unsigned char* ByteDO1 = malloc ( sizeof ( unsigned char ) );
 	unsigned char* ByteUO2 = malloc ( sizeof ( unsigned char ) );
 	unsigned char* ByteDO2 = malloc ( sizeof ( unsigned char ) );
-	memset ( ByteUO1, 0, sizeof ( ByteUO1 ) );
-	memset ( ByteDO1, 0, sizeof ( ByteDO1 ) );
-	memset ( ByteUO2, 0, sizeof ( ByteUO2 ) );
-	memset ( ByteDO2, 0, sizeof ( ByteDO2 ) );
+	memset ( ByteUO1, 0, sizeof ( unsigned char ) );
+	memset ( ByteDO1, 0, sizeof ( unsigned char ) );
+	memset ( ByteUO2, 0, sizeof ( unsigned char ) );
+	memset ( ByteDO2, 0, sizeof ( unsigned char ) );
 
 	cur_key_byte = key_buf++[0];
 	cur_pbm_byte = pbm_buf++[0];
@@ -136,15 +136,15 @@ int generatePBMs ( char* outputname, int width, int height, unsigned char  *key_
 				shift--;
 				//pbm_i == k as temp fix **test case passed**
 				if ( ++halfByte == HALFBYTE || pbm_i == k ) {
-					memcpy ( &row1byteO1[pos], ByteUO1, sizeof ( ByteUO1 ) );
-					memcpy ( &row2byteO1[pos], ByteDO1, sizeof ( ByteDO1 ) );
-					memcpy ( &row1byteO2[pos], ByteUO2, sizeof ( ByteUO2 ) );
-					memcpy ( &row2byteO2[pos], ByteDO2, sizeof ( ByteDO2 ) );
+					memcpy ( &row1byteO1[pos], ByteUO1, sizeof ( unsigned char ) );
+					memcpy ( &row2byteO1[pos], ByteDO1, sizeof ( unsigned char ) );
+					memcpy ( &row1byteO2[pos], ByteUO2, sizeof ( unsigned char ) );
+					memcpy ( &row2byteO2[pos], ByteDO2, sizeof ( unsigned char ) );
 
-					memset ( ByteUO1, 0, sizeof ( ByteUO1 ) );
-					memset ( ByteDO1, 0, sizeof ( ByteDO1 ) );
-					memset ( ByteUO2, 0, sizeof ( ByteUO2 ) );
-					memset ( ByteDO2, 0, sizeof ( ByteDO2 ) );
+					memset ( ByteUO1, 0, sizeof ( unsigned char ) );
+					memset ( ByteDO1, 0, sizeof ( unsigned char ) );
+					memset ( ByteUO2, 0, sizeof ( unsigned char ) );
+					memset ( ByteDO2, 0, sizeof ( unsigned char ) );
 					halfByte = 0;
 					shift = 3;
 					pos++;
