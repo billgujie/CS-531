@@ -1,5 +1,20 @@
+/*
+ * Visual Cryptography Implementation
+ * by Jie Gu
+ * Feb 10,2014
+ *
+ * This is a 4X expansion verison of vis-crypt
+ * the input pbm image is encrypted into 2 files
+ * using a passphrase generated key.
+ *
+ */
 #include "hw2.h"
 
+/*
+ * verify the format of pbm, check magicnum
+ * did not implement strict format checking according
+ * to pbm file description
+ */
 void pbmVerify ( FILE * pbm_fp, int *width, int *height )
 {
 	char magicnum[10] = "";
@@ -15,34 +30,48 @@ void pbmVerify ( FILE * pbm_fp, int *width, int *height )
 	}
 	printerror ( "pbm verify failed" );
 }
-void pbmheader (FILE* fp, int width, int height){
-	fprintf(fp,"P4\n");
-	fprintf(fp,"%d %d\n",width,height);
+/*
+ * print pbm header with magicnum and size info
+ */
+void pbmheader ( FILE* fp, int width, int height )
+{
+	fprintf ( fp, "P4\n" );
+	if ( ferror ( fp ) != 0 )
+		printerror ( "header write failed" );
+	fprintf ( fp, "%d %d\n", width, height );
+	if ( ferror ( fp ) != 0 )
+		printerror ( "header write failed" );
 }
+/*
+ * take pbm_buf and key_buf to encrypt two shares of image
+ * return the total number of bytes wrote for a single image (exclude header size)
+ *
+ * bug fixed: where if width%8!=0 but 2*width/8==0 would produce error result.
+ */
 int generatePBMs ( char* outputname, int width, int height, unsigned char  *key_buf, unsigned char *pbm_buf )
 {
 	int totalByte = 0;
-	int pbm_i, key_i, k, shift, halfByte, pos, wc, hc, lastByte;
+	int pbm_i, key_i, k, shift, halfByte, pos, wc, hc;
 	int extra_bit = width % 8;
 	int in_widthByte = ( width % 8 > 0 ) ? ( width / 8 + 1 ) :  ( width / 8 );
 	int out_widthByte = ( width * 2 % 8 > 0 ) ?  ( width * 2 / 8 + 1 ) : ( width * 2 / 8 );
 	unsigned char cur_key_byte;
 	unsigned char cur_pbm_byte;
 
-	char outname1[BUFLEN]="";
-	char outname2[BUFLEN]="";
+	char outname1[BUFLEN] = "";
+	char outname2[BUFLEN] = "";
 	strcpy ( outname1, outputname );
 	strcpy ( outname2, outputname );
 	FILE * share1;
 	FILE * share2;
-	share1 = fopen ( strcat ( outname1, ".1.pbm\0" ), "w" );
-	share2 = fopen ( strcat ( outname2, ".2.pbm\0" ), "w" );
+	share1 = fopen ( strcat ( outname1, ".1.pbm" ), "w" );
+	share2 = fopen ( strcat ( outname2, ".2.pbm" ), "w" );
 	if ( share1 == NULL || share2 == NULL ) {
 		printerror ( "file create failed" );
 	}
-	pbmheader (share1, width*2, height*2);
-	pbmheader (share2, width*2, height*2);
-	
+	pbmheader ( share1, width * 2, height * 2 );
+	pbmheader ( share2, width * 2, height * 2 );
+
 	unsigned char* row1byteO1 = malloc ( out_widthByte );
 	unsigned char* row2byteO1 = malloc ( out_widthByte );
 	unsigned char* row1byteO2 = malloc ( out_widthByte );
@@ -61,14 +90,22 @@ int generatePBMs ( char* outputname, int width, int height, unsigned char  *key_
 	cur_key_byte = key_buf++[0];
 	cur_pbm_byte = pbm_buf++[0];
 
+	//initialize before looping
 	shift = 3;
 	halfByte = 0;
 	pos = 0;
 	key_i = 7;
+	//hc=height counter
 	for ( hc = 0; hc < height; hc++ ) {
+		//wc=width counter
 		for ( wc = 0; wc < in_widthByte; wc++ ) {
+
+			//k limits how many bits pbm_i would iterate, if
+			//its last byte, this would calculate based on
+			//extra_bit, otherwise its always 0.
 			k = ( wc == ( in_widthByte - 1 ) ) ? ( 7 - extra_bit + 1 ) : 0;
-			lastByte = ( wc == ( in_widthByte - 1 ) ) ? 1 : 0;
+
+			//problem with lastByte flag set too ealier fixed
 			for ( pbm_i = 7; pbm_i >= k; pbm_i-- ) {
 				key_bit = ( int ) ( ( cur_key_byte >> key_i-- ) & 0x1 );
 				pbm_bit = ( int ) ( ( cur_pbm_byte >> pbm_i ) & 0x1 );
@@ -97,7 +134,8 @@ int generatePBMs ( char* outputname, int width, int height, unsigned char  *key_
 				}
 
 				shift--;
-				if ( ++halfByte == HALFBYTE || lastByte == 1 ) {
+				//pbm_i == k as temp fix **test case passed**
+				if ( ++halfByte == HALFBYTE || pbm_i == k ) {
 					memcpy ( &row1byteO1[pos], ByteUO1, sizeof ( ByteUO1 ) );
 					memcpy ( &row2byteO1[pos], ByteDO1, sizeof ( ByteDO1 ) );
 					memcpy ( &row1byteO2[pos], ByteUO2, sizeof ( ByteUO2 ) );
@@ -112,6 +150,7 @@ int generatePBMs ( char* outputname, int width, int height, unsigned char  *key_
 					pos++;
 					totalByte++;
 				}
+				//key_i is a seperate iterator, it reset itself when reaches 0
 				if ( key_i < 0 ) {
 					key_i = 7;
 					cur_key_byte = key_buf++[0];
@@ -119,6 +158,7 @@ int generatePBMs ( char* outputname, int width, int height, unsigned char  *key_
 			}
 			cur_pbm_byte = pbm_buf++[0];
 		}
+		//row1 and row2 for each image constructed, write to file and check retval
 		int ck1 = fwrite ( row1byteO1 , sizeof ( unsigned char ), out_widthByte, share1 );
 		int ck2 = fwrite ( row2byteO1 , sizeof ( unsigned char ), out_widthByte, share1 );
 		int ck3 = fwrite ( row1byteO2 , sizeof ( unsigned char ), out_widthByte, share2 );
@@ -131,8 +171,6 @@ int generatePBMs ( char* outputname, int width, int height, unsigned char  *key_
 	}
 	fclose ( share1 );
 	fclose ( share2 );
-	//free ( outname1 );
-	//free ( outname2 );
 	free ( row1byteO1 );
 	free ( row2byteO1 );
 	free ( row1byteO2 );
@@ -143,17 +181,20 @@ int generatePBMs ( char* outputname, int width, int height, unsigned char  *key_
 	free ( ByteDO2 );
 	return totalByte * 2;
 }
+/*
+ * main function to handle visual-cryptography
+ */
 int encrypt ( char * p, char * out, char* filepath )
 {
-	int width = 0, height = 0, keylen = 0, pbmlen = 0, retval = 0, eofflag = 0, expect;
+	int width, height, keylen, pbmlen, retval, eofflag, expect;
 	unsigned char* key_buf;
 	unsigned char* pbm_buf;
 	FILE* pbm_fp = fileopen ( filepath );
-	
+
 	// verify the magic number and width height of pbm file
 	pbmVerify ( pbm_fp, &width, &height ) ;
 	keylen = ( width * height ) / 8 + 1;
-	pbmlen = ( width * ( height / 8 + 1 ) );
+	pbmlen = ( height * ( width / 8 + 1 ) );
 	key_buf = ( unsigned char* ) malloc ( keylen );
 	pbm_buf = ( unsigned char* ) malloc ( pbmlen );
 
@@ -178,9 +219,11 @@ int encrypt ( char * p, char * out, char* filepath )
 	expect = ( width * 2 % 8 > 0 ) ?  ( width * 2 / 8 + 1 ) : ( width * 2 / 8 );
 	expect = expect * height * 2;
 	if ( retval == expect ) {
+		free ( key_buf );
+		free ( pbm_buf );
 		return 0;
-	}else{
-		printerror("encrypt output length error");
+	} else {
+		printerror ( "encrypt output length error" );
 	}
 	return 1;
 }

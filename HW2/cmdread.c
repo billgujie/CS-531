@@ -1,3 +1,8 @@
+/*
+ * Read Command Line Argument
+ * by Jie Gu
+ * Reference: http://merlot.usc.edu/cs531-s14/misc/prog-faq/#howto_parse
+ */
 #include "hw2.h"
 
 void Usage()

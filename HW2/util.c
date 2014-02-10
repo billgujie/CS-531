@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "hw2.h"
 /*
  * read from stdin(filepath==NULL) or filepath
