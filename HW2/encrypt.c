@@ -182,4 +182,5 @@ int encrypt ( char * p, char * out, char* filepath )
 	}else{
 		printerror("encrypt output length error");
 	}
+	return 1;
 }

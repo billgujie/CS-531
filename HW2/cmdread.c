@@ -43,6 +43,8 @@ Argvs ParseCommandLine ( int argc, char **argv )
 	} else {
 		Usage();
 	}
+	result.file1=NULL;
+	result.file2=NULL;
 	result.mode=msg_type;
 	checkarglimit ( msg_type, argc );
 	int file1_flag = 0;
