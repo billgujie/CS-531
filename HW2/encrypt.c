@@ -29,14 +29,14 @@ int generatePBMs ( char* outputname, int width, int height, unsigned char  *key_
 	unsigned char cur_key_byte;
 	unsigned char cur_pbm_byte;
 
-	char * outname1 = malloc ( BUFLEN );
-	char * outname2 = malloc ( BUFLEN );
-	strcat ( outname1, outputname );
-	strcat ( outname2, outputname );
+	char outname1[BUFLEN]="";
+	char outname2[BUFLEN]="";
+	strcpy ( outname1, outputname );
+	strcpy ( outname2, outputname );
 	FILE * share1;
 	FILE * share2;
-	share1 = fopen ( strcat ( outname1, ".1.pbm" ), "w" );
-	share2 = fopen ( strcat ( outname2, ".2.pbm" ), "w" );
+	share1 = fopen ( strcat ( outname1, ".1.pbm\0" ), "w" );
+	share2 = fopen ( strcat ( outname2, ".2.pbm\0" ), "w" );
 	if ( share1 == NULL || share2 == NULL ) {
 		printerror ( "file create failed" );
 	}
@@ -119,10 +119,10 @@ int generatePBMs ( char* outputname, int width, int height, unsigned char  *key_
 			}
 			cur_pbm_byte = pbm_buf++[0];
 		}
-		int ck1 = fwrite ( row1byteO1 , sizeof ( unsigned char* ), out_widthByte, share1 );
-		int ck2 = fwrite ( row2byteO1 , sizeof ( unsigned char* ), out_widthByte, share1 );
-		int ck3 = fwrite ( row1byteO2 , sizeof ( unsigned char* ), out_widthByte, share2 );
-		int ck4 = fwrite ( row2byteO2 , sizeof ( unsigned char* ), out_widthByte, share2 );
+		int ck1 = fwrite ( row1byteO1 , sizeof ( unsigned char ), out_widthByte, share1 );
+		int ck2 = fwrite ( row2byteO1 , sizeof ( unsigned char ), out_widthByte, share1 );
+		int ck3 = fwrite ( row1byteO2 , sizeof ( unsigned char ), out_widthByte, share2 );
+		int ck4 = fwrite ( row2byteO2 , sizeof ( unsigned char ), out_widthByte, share2 );
 		if ( ( ck1 == ck2 ) && ( ck2 == ck3 ) && ( ck3 == ck4 ) && ( ck4 == out_widthByte ) ) {
 			pos = 0;
 		} else {
@@ -131,8 +131,8 @@ int generatePBMs ( char* outputname, int width, int height, unsigned char  *key_
 	}
 	fclose ( share1 );
 	fclose ( share2 );
-	free ( outname1 );
-	free ( outname2 );
+	//free ( outname1 );
+	//free ( outname2 );
 	free ( row1byteO1 );
 	free ( row2byteO1 );
 	free ( row1byteO2 );
