@@ -26,17 +26,20 @@ void checkarglimit ( int msg_type, int argc )
 		Usage();
 	}
 }
+
+
 Argvs ParseCommandLine ( int argc, char **argv )
 {
-	int p_flag=0;
-	int l_flag=0;
-	int out_flag=0;
+	int p_flag = 0;
+	int l_flag = 0;
+	int out_flag = 0;
 	Argvs result;
 	int msg_type = 0;
 	argc--, argv++;
 	if ( argc <= 0 ) {
 		Usage();
 	}
+//BEGIN REFERENCE FROM: http://merlot.usc.edu/cs531-s14/misc/prog-faq/#howto_parse
 	if ( strcmp ( *argv, "stream" ) == 0 ) {
 		msg_type = OP_STREAM;
 	} else if ( strcmp ( *argv, "encrypt" ) == 0 ) {
@@ -48,61 +51,61 @@ Argvs ParseCommandLine ( int argc, char **argv )
 	} else {
 		Usage();
 	}
-	result.file1=NULL;
-	result.file2=NULL;
-	result.mode=msg_type;
+	result.file1 = NULL;
+	result.file2 = NULL;
+	result.mode = msg_type;
 	checkarglimit ( msg_type, argc );
 	int file1_flag = 0;
-	for ( argc--, argv++; argc > 0; argc--, argv++) {
-		if ( *argv[0] == '-' && file1_flag==0) {
+	for ( argc--, argv++; argc > 0; argc--, argv++ ) {
+		if ( *argv[0] == '-' && file1_flag == 0 ) {
 			if ( strncmp ( *argv, "-p=" , OPTION_HEAD_LEN1 ) == 0 ) {
-				if (msg_type==OP_MERGE || msg_type==OP_DECRYPT || p_flag==1){
+				if ( msg_type == OP_MERGE || msg_type == OP_DECRYPT || p_flag == 1 ) {
 					Usage();
 				}
 				char * pch;
-				pch = strstr (*argv,"=");
-				result.pphrase=malloc(strlen(++pch));
-				strcpy(result.pphrase , pch);
-				p_flag=1;
+				pch = strstr ( *argv, "=" );
+				result.pphrase = malloc ( strlen ( ++pch ) + 1 );
+				strcpy ( result.pphrase , pch );
+				p_flag = 1;
 			} else if ( strncmp ( *argv, "-l=" , OPTION_HEAD_LEN1 ) == 0 ) {
-				if (msg_type==OP_ENCRYPT || msg_type==OP_MERGE || msg_type==OP_DECRYPT||l_flag==1){
+				if ( msg_type == OP_ENCRYPT || msg_type == OP_MERGE || msg_type == OP_DECRYPT || l_flag == 1 ) {
 					Usage();
 				}
 				char * pch;
-				pch = strstr (*argv,"=");
+				pch = strstr ( *argv, "=" );
 				pch++;
-				result.len = atoi(pch);
-				l_flag=1;
-			} else if ( strncmp ( *argv, "-out=" , OPTION_HEAD_LEN2) ==0){
-				if (msg_type==OP_STREAM || msg_type==OP_MERGE || msg_type==OP_DECRYPT||out_flag==1){
+				result.len = atoi ( pch );
+				l_flag = 1;
+			} else if ( strncmp ( *argv, "-out=" , OPTION_HEAD_LEN2 ) == 0 ) {
+				if ( msg_type == OP_STREAM || msg_type == OP_MERGE || msg_type == OP_DECRYPT || out_flag == 1 ) {
 					Usage();
 				}
 				char * pch;
-				pch = strstr (*argv,"=");
-				result.out=malloc(strlen(++pch));
-				strcpy(result.out , pch);
-				out_flag=1;
-			}else{
+				pch = strstr ( *argv, "=" );
+				result.out = malloc ( strlen ( ++pch ) + 1 );
+				strcpy ( result.out , pch );
+				out_flag = 1;
+			} else {
 				Usage();
 			}
-		}else if ( *argv[0] == '-' && file1_flag==1){
+		} else if ( *argv[0] == '-' && file1_flag == 1 ) {
 			Usage();
-		}else if (msg_type==OP_STREAM ){
+		} else if ( msg_type == OP_STREAM ) {
 			Usage();
-		}else{
-			if (file1_flag==0){
-				result.file1=malloc(strlen(*argv));
-				strcpy(result.file1 , *argv);
-				file1_flag=1;
-			}else{
-				if (msg_type==OP_STREAM || msg_type==OP_ENCRYPT || msg_type==OP_DECRYPT){
+		} else {
+			if ( file1_flag == 0 ) {
+				result.file1 = malloc ( strlen ( *argv ) + 1 );
+				strcpy ( result.file1 , *argv );
+				file1_flag = 1;
+			} else {
+				if ( msg_type == OP_STREAM || msg_type == OP_ENCRYPT || msg_type == OP_DECRYPT ) {
 					Usage();
 				}
-				result.file2=malloc(strlen(*argv));
-				strcpy(result.file2 , *argv);
+				result.file2 = malloc ( strlen ( *argv ) + 1 );
+				strcpy ( result.file2 , *argv );
 			}
 		}
-		
+//END REFERENCE FROM: http://merlot.usc.edu/cs531-s14/misc/prog-faq/#howto_parse
 	}
 	return result;
 }

@@ -10,6 +10,8 @@
  * that takes on the value from "00" through "99". The
  * 3rd part is the passphrase. Initially, the first
  * part is the MD5 checksum of the passphrase.
+ * 
+ * Reference: http://merlot.usc.edu/cs531-s14/homeworks/hw2/#stream
  *
  */
 #include "hw2.h"
@@ -28,7 +30,7 @@ int stream ( char* p, int cipher_len , unsigned char* remote, int mode )
 	int count = 0;
 	int i = 0;
 	unsigned char* write_remote = remote;
-	
+
 	//BEGIN CODE ADAPTED FROM CS531 WEBSITE
 	for ( count = 0; count < cycle; count++ ) {
 		sprintf ( &s[MD5_DIGEST_LENGTH], "%02d%s", i, p );

@@ -1,5 +1,5 @@
 /*
- * Visual Cryptography Implementation
+ * vis-cryptography: encrypt
  * by Jie Gu
  * Feb 10,2014
  *
@@ -10,38 +10,6 @@
  */
 #include "hw2.h"
 
-/*
- * verify the format of pbm, check magicnum
- * did not implement strict format checking according
- * to pbm file description
- */
-void pbmVerify ( FILE * pbm_fp, int *width, int *height )
-{
-	char magicnum[10] = "";
-	fgets ( magicnum, 10, pbm_fp );
-	int w = 0, h = 0;
-	if ( strcmp ( magicnum, "P4\n" ) == 0 ) {
-		fscanf ( pbm_fp, "%d", &w );
-		fscanf ( pbm_fp, "%d", &h );
-		memcpy ( width, &w, sizeof ( int ) );
-		memcpy ( height, &h, sizeof ( int ) );
-		fscanf ( pbm_fp, " " );
-		return;
-	}
-	printerror ( "pbm verify failed" );
-}
-/*
- * print pbm header with magicnum and size info
- */
-void pbmheader ( FILE* fp, int width, int height )
-{
-	fprintf ( fp, "P4\n" );
-	if ( ferror ( fp ) != 0 )
-		printerror ( "header write failed" );
-	fprintf ( fp, "%d %d\n", width, height );
-	if ( ferror ( fp ) != 0 )
-		printerror ( "header write failed" );
-}
 /*
  * take pbm_buf and key_buf to encrypt two shares of image
  * return the total number of bytes wrote for a single image (exclude header size)
@@ -55,6 +23,7 @@ int generatePBMs ( char* outputname, int width, int height, unsigned char  *key_
 	int extra_bit = width % 8;
 	int in_widthByte = ( width % 8 > 0 ) ? ( width / 8 + 1 ) :  ( width / 8 );
 	int out_widthByte = ( width * 2 % 8 > 0 ) ?  ( width * 2 / 8 + 1 ) : ( width * 2 / 8 );
+	int limiter = out_widthByte * height;
 	unsigned char cur_key_byte;
 	unsigned char cur_pbm_byte;
 
@@ -156,7 +125,11 @@ int generatePBMs ( char* outputname, int width, int height, unsigned char  *key_
 					cur_key_byte = key_buf++[0];
 				}
 			}
-			cur_pbm_byte = pbm_buf++[0];
+			//limit reading out of index in the very end to cause memory error
+			if ( totalByte < limiter ) {
+				cur_pbm_byte = pbm_buf++[0];
+			}
+
 		}
 		//row1 and row2 for each image constructed, write to file and check retval
 		int ck1 = fwrite ( row1byteO1 , sizeof ( unsigned char ), out_widthByte, share1 );
@@ -183,6 +156,7 @@ int generatePBMs ( char* outputname, int width, int height, unsigned char  *key_
 }
 /*
  * main function to handle visual-cryptography
+ * return 0 if no error found
  */
 int encrypt ( char * p, char * out, char* filepath )
 {
